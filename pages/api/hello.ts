@@ -1,13 +1,27 @@
-// Next.js API route support: https://nextjs.org/docs/api-routes/introduction
-import type { NextApiRequest, NextApiResponse } from 'next'
+export const runtime = 'edge';
 
-type Data = {
-  name: string
-}
+const encoder = new TextEncoder();
 
-export default function handler(
-  req: NextApiRequest,
-  res: NextApiResponse<Data>
-) {
-  res.status(200).json({ name: 'John Doe' })
+export default function handler(req: Request) {
+    const stream = new TransformStream();
+
+    const writer = stream.writable.getWriter();
+
+    // Once the client disconnects, close the stream
+    req.signal.addEventListener('abort', () => {
+        writer.close();
+    });
+
+    writer.write(encoder.encode(`id:\nevent:TEST\ndata:${process.env.NEXT_PUBLIC_TEST_VAR}\nretry:500\n\n`));
+
+    return new Response(stream.readable, {
+        headers: {
+            'Access-Control-Allow-Origin': '*',
+            'Content-Type': 'text/event-stream; charset=utf-8',
+            Connection: 'keep-alive',
+            'Cache-Control': 'no-cache, no-transform',
+            'X-Accel-Buffering': 'no',
+            'Content-Encoding': 'none',
+        },
+    });
 }

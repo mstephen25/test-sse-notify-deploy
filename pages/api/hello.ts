@@ -7,9 +7,15 @@ export default function handler(req: Request) {
 
     const writer = stream.writable.getWriter();
 
+    // 🔁 Keep-alive ping every 15 seconds
+    const ping = setInterval(() => {
+        writer.write(encoder.encode(`:\n\n`)); // SSE comment ping
+    }, 10_000);
+
     // Once the client disconnects, close the stream
     req.signal.addEventListener('abort', () => {
         writer.close();
+        clearInterval(ping);
     });
 
     writer.write(encoder.encode(`id:\nevent:TEST\ndata:${process.env.NEXT_PUBLIC_TEST_VAR}\nretry:500\n\n`));

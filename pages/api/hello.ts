@@ -9,7 +9,7 @@ export default function handler(req: Request) {
 
     // 🔁 Keep-alive ping every 15 seconds
     const ping = setInterval(() => {
-        writer.write(encoder.encode(`:\n\n`)); // SSE comment ping
+        writer.write(encoder.encode(`:\n\n`));
     }, 10_000);
 
     // Once the client disconnects, close the stream

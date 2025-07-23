@@ -4,6 +4,7 @@
   "private": true,
   "scripts": {
     "dev": "next dev",
+    "prebuild": "tsx ./scripts/prebuild.ts",
     "build": "next build",
     "start": "next start",
     "lint": "next lint"
@@ -14,11 +15,14 @@
     "react-dom": "19.1.0"
   },
   "devDependencies": {
+    "@next/env": "^15.4.3",
     "@types/node": "24.1.0",
     "@types/react": "19.1.8",
     "@types/react-dom": "19.1.6",
     "eslint": "9.31.0",
     "eslint-config-next": "15.4.3",
+    "ts-node": "^10.9.2",
+    "tsx": "^4.20.3",
     "typescript": "5.8.3"
   },
   "packageManager": "yarn@1.22.22+sha512.a6b2f7906b721bba3d67d4aff083df04dad64c399707841b7acf00f6b133b7ac24255f2652fa22ae3534329dc6180534e98d17432037ff6fd140556e2bb3137e"

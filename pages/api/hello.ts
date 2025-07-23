@@ -95,18 +95,4 @@ export default function handler(req: NextApiRequest, res: NextApiResponse) {
         versionFanOut.unsubscribe(res);
         res.end();
     });
-
-    // return new Response(stream.readable, {
-    //     headers: {
-    //         // CORS
-    //         'Access-Control-Allow-Origin': '*',
-    //         // Required headers to stream to the client
-    //         'Content-Type': 'text/event-stream; charset=utf-8',
-    //         Connection: 'keep-alive',
-    //         'Cache-Control': 'no-cache, no-transform',
-    //         // https://nginx.org/en/docs/http/ngx_http_proxy_module.html
-    //         'X-Accel-Buffering': 'no',
-    //         'Content-Encoding': 'none',
-    //     },
-    // });
 }

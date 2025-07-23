@@ -2,7 +2,7 @@ import { NextApiRequest, NextApiResponse } from 'next';
 
 const INTERVAL_TIME_MS = 5_000;
 
-const encoder = new TextEncoder();
+// const encoder = new TextEncoder();
 
 // ? What is the benefit of this?
 // The server only polls the latest version.txt once, and fans the result out to multiple clients.
@@ -30,7 +30,7 @@ const versionNotifier = () => {
 
             // send the result to all subscribed clients
             writers.forEach((writer) => {
-                writer.write(encoder.encode(`id:\nevent:version\ndata:${version}\nretry:500\n\n`));
+                writer.write(`id:\nevent:version\ndata:${version}\nretry:500\n\n`);
             });
 
             timeout = setTimeout(start, INTERVAL_TIME_MS);

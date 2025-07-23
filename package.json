@@ -5,7 +5,7 @@
   "scripts": {
     "dev": "next dev",
     "prebuild": "tsx ./scripts/prebuild.ts",
-    "build": "NEXT_PUBLIC_APP_VERSION=$(yarn prebuild) next build",
+    "build": "NEXT_PUBLIC_APP_VERSION=$(yarn --silent prebuild) && next build",
     "start": "next start",
     "lint": "next lint"
   },

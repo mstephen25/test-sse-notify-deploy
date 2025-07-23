@@ -22,6 +22,7 @@ const versionNotifier = () => {
 
     let timeout: NodeJS.Timeout | null = null;
 
+    //
     const start = async () => {
         try {
             // retrieve the latest version.txt

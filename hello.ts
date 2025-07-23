@@ -18,7 +18,7 @@ const versionNotifier = () => {
     let host: string;
 
     // A list of writers, each being for a response stream to a client
-    const writers = new Set<NextApiResponse>();
+    const writers = new Set<WritableStreamDefaultWriter<any>>();
 
     let timeout: NodeJS.Timeout | null = null;
 
@@ -52,12 +52,12 @@ const versionNotifier = () => {
             if (host) return;
             host = str;
         },
-        subscribe: (writer: NextApiResponse) => {
+        subscribe: (writer: WritableStreamDefaultWriter<any>) => {
             writers.add(writer);
             // If this is the first client, start polling version.txt
             if (writers.size === 1) start();
         },
-        unsubscribe: (writer: NextApiResponse) => {
+        unsubscribe: (writer: WritableStreamDefaultWriter<any>) => {
             writers.delete(writer);
             // If there are no more clients, stop polling version.txt
             if (writers.size === 0) stop();
@@ -69,44 +69,34 @@ const versionNotifier = () => {
 const versionFanOut = versionNotifier();
 
 export default function handler(req: NextApiRequest, res: NextApiResponse) {
-    // Set the necessary headers for Server-Sent Events (SSE)
-    res.setHeader('Access-Control-Allow-Origin', '*'); // CORS
-    res.setHeader('Content-Type', 'text/event-stream; charset=utf-8');
-    res.setHeader('Connection', 'keep-alive');
-    res.setHeader('Cache-Control', 'no-cache, no-transform');
-    res.setHeader('X-Accel-Buffering', 'no'); // Important for Nginx to not buffer SSE
-    res.setHeader('Content-Encoding', 'none'); // Prevents gzip/deflate which can interfere with SSE
+    const host = req.headers['host'];
 
-    res.writeHead(200);
+    // Create a response stream
+    const stream = new TransformStream();
+    const writer = stream.writable.getWriter();
 
-    const host = req.headers['host']!;
     versionFanOut.setHost(host);
 
-    versionFanOut.subscribe(res);
-
-    // // Create a response stream
-    // const stream = new TransformStream();
-    // const writer = stream.writable.getWriter();
-
-    // // Subscribe the client to notifications for changes in version.txt
+    // Subscribe the client to notifications for changes in version.txt
+    versionFanOut.subscribe(writer);
 
     // Stop streaming to the client once they disconnect
-    req.once('close', () => {
-        versionFanOut.unsubscribe(res);
-        res.end();
+    req.signal.addEventListener('abort', () => {
+        versionFanOut.unsubscribe(writer);
+        writer.close();
     });
 
-    // return new Response(stream.readable, {
-    //     headers: {
-    //         // CORS
-    //         'Access-Control-Allow-Origin': '*',
-    //         // Required headers to stream to the client
-    //         'Content-Type': 'text/event-stream; charset=utf-8',
-    //         Connection: 'keep-alive',
-    //         'Cache-Control': 'no-cache, no-transform',
-    //         // https://nginx.org/en/docs/http/ngx_http_proxy_module.html
-    //         'X-Accel-Buffering': 'no',
-    //         'Content-Encoding': 'none',
-    //     },
-    // });
+    return new Response(stream.readable, {
+        headers: {
+            // CORS
+            'Access-Control-Allow-Origin': '*',
+            // Required headers to stream to the client
+            'Content-Type': 'text/event-stream; charset=utf-8',
+            Connection: 'keep-alive',
+            'Cache-Control': 'no-cache, no-transform',
+            // https://nginx.org/en/docs/http/ngx_http_proxy_module.html
+            'X-Accel-Buffering': 'no',
+            'Content-Encoding': 'none',
+        },
+    });
 }

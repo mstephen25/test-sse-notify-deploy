@@ -8,9 +8,13 @@ const Component = () => {
     useEffect(() => {
         const source = new EventSource('/api/hello');
 
-        source.addEventListener('message', (message) => {
+        source.addEventListener('version', (message) => {
             console.log(message.data);
         });
+
+        return () => {
+            source.close();
+        };
     }, []);
 
     return null;

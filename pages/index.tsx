@@ -5,6 +5,8 @@ import styles from '../styles/Home.module.css';
 import { useEffect } from 'react';
 
 const Component = () => {
+    console.log(process.env.NEXT_PUBLIC_APP_VERSION);
+
     useEffect(() => {
         const source = new EventSource('/api/hello');
 

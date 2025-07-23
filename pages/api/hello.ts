@@ -29,6 +29,8 @@ const versionNotifier = () => {
             const res = await fetch(`${protocol}://${host}/version.txt`, { cache: 'no-store' });
             const version = await res.text();
 
+            if (res.status !== 200) throw new Error(`Non-200 response received. Does version.txt exist?`);
+
             // send the result to all subscribed clients
             writers.forEach((writer) => {
                 writer.write(`id:\nevent:version\ndata:${version}\nretry:500\n\n`);
